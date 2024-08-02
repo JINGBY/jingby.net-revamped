@@ -59,6 +59,10 @@ body {
   color: var(--graphics-color);
 }
 
+.mobile-overflow {
+  overflow-x: hidden;
+}
+
 .canvas {
   position: fixed;
   opacity: 8%;
@@ -264,10 +268,6 @@ aside {
   transition: opacity 200ms ease-out;
 }
 
-#main-nav {
-
-}
-
 .menu-icon {
   margin-top: 40px;
   height: 15px;
@@ -318,6 +318,7 @@ aside {
   padding: 20px;
   cursor: pointer;
   transition: background-color 200ms ease-in-out;
+  margin-top: -4em;
 }
 
 .close-icon:hover {
@@ -366,6 +367,10 @@ aside {
   white-space: nowrap;
   animation: typing 5s steps(5, end) infinite;
   transition: left 100ms ease-out;
+}
+
+.space-menu {
+  height: 8em;
 }
 
 @keyframes typing {
@@ -872,5 +877,9 @@ footer {
 
   .social-link {
     font-size: 3rem;
+  }
+
+  .space-menu {
+    height: 7em;
   }
 }
