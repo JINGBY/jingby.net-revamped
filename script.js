@@ -1,9 +1,11 @@
-// Lenis smooth scroll
+//      Lenis smooth scroll
 const lenis = new Lenis()
 
-/*lenis.on('scroll', (e) => {
+/*
+lenis.on('scroll', (e) => {
   console.log(e)
-})*/
+})
+*/
 
 function raf(time) {
   lenis.raf(time)
@@ -11,6 +13,8 @@ function raf(time) {
 }
 
 requestAnimationFrame(raf)
+
+//      Utils
 
 const body = document.body;
 
@@ -30,9 +34,50 @@ function scrollToTop() {
   lenis.scrollTo(0);
 }
 
+//      Custom cursor
+
+const cursor = document.querySelector('.cursor');
+let mouseX = 0, mouseY = 0;
+let cursorX = 0, cursorY = 0;
+let lastFrame = 0;
+
+document.addEventListener('mousemove', e => {
+  mouseX = e.pageX - 10;
+  mouseY = e.pageY - 10;
+  cursor.style.display = "inline-block";
+});
+
+function animate() {
+  const currentTime = performance.now();
+  const deltaTime = currentTime - lastFrame;
+  lastFrame = currentTime;
+
+  const speed = 0.1;
+  cursorX += (mouseX - cursorX) * speed;
+  cursorY += (mouseY - cursorY) * speed;
+
+  cursor.style.left = cursorX + 'px';
+  cursor.style.top = cursorY + 'px';
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+
+document.addEventListener('click', e => {
+  cursor.classList.add("expand");
+  setTimeout(() => {
+    cursor.classList.remove("expand");
+  }, 500);
+});
+
+//      Menu
+
 const menuIcon = document.querySelector(".menu-icon");
 const menu = document.querySelector("menu");
+const menuBackground = document.querySelector(".menu-background");
 const closeIcon = document.querySelector(".close-icon");
+const canvas = document.querySelector(".canvas");
 
 function openMenu() {
   menu.style.display = "block";
@@ -40,6 +85,9 @@ function openMenu() {
   closeIcon.style.display = "flex";
 
   toggleScrolling()
+
+  menuBackground.style.display = "block";
+  canvas.classList.add("canvas-menu");
 }
 
 function closeMenu() {
@@ -48,6 +96,9 @@ function closeMenu() {
   closeIcon.style.display = "none";
 
   toggleScrolling()
+
+  menuBackground.style.display = "none";
+  canvas.classList.remove("canvas-menu");
 }
 
 menuIcon.onclick = function() {
@@ -63,10 +114,9 @@ const menuFlex = document.getElementById("menu-flex");
 
 function moveMenuLine(position) {
   menuLine.style.top = position * (menuFlex.clientHeight/menuFlex.childElementCount) + "px";
-
-  //console.log(socialLinks.clientHeight);
-  //console.log(linkArrow.style.top)
 }
+
+//      Follow links
 
 const linkArrow = document.getElementById("link-arrow");
 const socialLinks = document.getElementById("social-links");
@@ -76,9 +126,6 @@ function moveLinkArrow(position) {
   linkArrow.style.paddingTop = "15px";
   linkArrow.style.opacity = "100%";
   linkArrow.style.rotate = "0deg";
-
-  //console.log(socialLinks.clientHeight);
-  //console.log(linkArrow.style.top)
 }
 
 function resetLinkArrow() {
@@ -99,46 +146,13 @@ document.onscroll = function() {
   scrollText.textContent = scrollPercentRounded + "%";
 }
 
-
-/*
-
-let mouseX;
-let mouseY;
-
-let isHoveringBanner = false;
-
-const maskCentering = 90;
-
-const noiseFilterMask = document.querySelector(".hero-banner-mask");
-const bannerCover = document.querySelector("#hero-banner");
-
-document.addEventListener("mousemove", trackMousePosition);
-
-bannerCover.onmouseenter = function() {
-  isHoveringBanner = true;
-}
-
-bannerCover.onmouseleave = function() {
-  isHoveringBanner = false;
-}
-
-function trackMousePosition(e) {
-  mouseX = e.clientX;
-  mouseY = e.clientY;
-
-  if (isHoveringBanner) {
-    noiseFilterMask.style.webkitMaskPositionX = mouseX - maskCentering + "px";
-    noiseFilterMask.style.webkitMaskPositionY = mouseY - 350 - maskCentering + "px";
-  }
-}
-
-*/
-
-// Animations
+//      Animations
 document.addEventListener("DOMContentLoaded", function() {
+  console.log("DOM fully loaded and parsed");
+
   gsap.registerPlugin(ScrollTrigger);
 
-  // Startup
+  //        Startup
   gsap.fromTo(".startup-anim-left", {
       x: -50,
       opacity: "0%"
@@ -205,9 +219,10 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   )
 
-  let headersWithAnimTop = gsap.utils.toArray(".scrolltriggered-anim-top");
+  //      Headers
+  let headerElements = gsap.utils.toArray(".animated-header");
 
-  headersWithAnimTop.forEach(function (header) {
+  headerElements.forEach(function (header) {
     gsap.fromTo(header, {
         y: 5,
         opacity: "0%"
@@ -226,31 +241,73 @@ document.addEventListener("DOMContentLoaded", function() {
     );
   });
 
-  /*
-  var containers = gsap.utils.toArray(".box-container");
+  //      Texts
+  let textElements = gsap.utils.toArray(".animated-text")
 
-  containers.forEach(function (container) {
-    gsap.fromTo(
-      container.querySelectorAll(".box"),
-      { y: -250 },
-      {
-        y: 0,
-        stagger: 0.3,
+  textElements.forEach(function (text) {
+    gsap.fromTo(text, {
+        y: 20,
+        opacity: "0%"
+      }, {
         scrollTrigger: {
-          trigger: container,
-          scrub: true,
+          trigger: text,
           start: "top bottom",
-          end: "top 20%",
-          immediateRender: false,
-          markers: true
-        }
-      }
+          end: "+=0",
+          //markers: true,
+          toggleActions: "restart none reverse none"
+        },
+        y: 0,
+        opacity: "100%",
+        ease: "power1.inOut",
+        duration: 1
+      },
     );
   });
-  */
 
-  // Logo hover
+  //      About photos
 
+  gsap.fromTo(".about-photos img", {
+      y: 200,
+      opacity: "0%"
+    }, {
+      scrollTrigger: {
+        trigger: ".about-photos",
+        start: "15% bottom",
+        end: "+=800",
+        scrub: true,
+        ease: "none"
+      },
+      stagger: {
+        each: 0.2,
+        from: "end"
+      },
+      y: 0,
+      opacity: "100%"
+    }
+  )
+
+  //      Social Links
+
+  //const socialLinks = document.querySelector(".social-links");
+
+  gsap.fromTo("#social-links a", {
+      x: -200,
+      opacity: "0%"
+    }, {
+      scrollTrigger: {
+        trigger: socialLinks,
+        start: "15% bottom",
+        end: "+=800",
+        scrub: true,
+        ease: "none"
+      },
+      stagger: 0.2,
+      x: 0,
+      opacity: "100%"
+    }
+  )
+
+  //      Logo hover
   const logoHoverHitbox = document.getElementById("logo-hover-hitbox");
 
   logoHoverHitbox.addEventListener("mouseenter", () => gsap.to("#turbulence", {
@@ -268,7 +325,7 @@ document.addEventListener("DOMContentLoaded", function() {
       opacity: "0%",
     }, {
       scrollTrigger: {
-        trigger: "#btp-scrolltrigger",
+        trigger: "#back-to-top-trigger",
         start: "top center",
         //markers: true,
         end: "+=0",
@@ -297,107 +354,50 @@ document.addEventListener("DOMContentLoaded", function() {
     duration: 0.3,
   }));
 
-  // Animated noise on background
-  const canvas = document.getElementById('canvas');
-  let ctx = canvas.getContext('2d');
+  //      Noise overlay
+  const ctx = canvas.getContext('2d');
 
-  function resize() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-  }
-  resize();
-  window.onresize = resize;
+  // Cache width and height
+  let width = window.innerWidth;
+  let height = window.innerHeight;
 
-  function noise(ctx) {
-    let w = ctx.canvas.width,
-        h = ctx.canvas.height,
-        idata = ctx.createImageData(w, h),
-        buffer32 = new Uint32Array(idata.data.buffer),
-        len = buffer32.length,
-        i = 0;
+  canvas.width = width;
+  canvas.height = height;
 
-    for(; i < len;)
-        buffer32[i++] = ((255 * Math.random())|0) << 24;
-    
-    ctx.putImageData(idata, 0, 0);
-  }
-
-  // Toggle for 30 fps
-  let toggle = true;
-
-  function loop() {
-    toggle = !toggle;
-    if (toggle) {
-        requestAnimationFrame(loop);
-        return;
+  window.onresize = () => {
+    const newWidth = window.innerWidth;
+    const newHeight = window.innerHeight;
+    if (newWidth !== width || newHeight !== height) {
+      width = newWidth;
+      height = newHeight;
+      canvas.width = width;
+      canvas.height = height;
+      imageData = ctx.createImageData(width, height);
+      buffer32 = new Uint32Array(imageData.data.buffer);
+      len = buffer32.length;
     }
-    noise(ctx);
-    requestAnimationFrame(loop);
   };
 
-  loop();
+  let imageData = ctx.createImageData(width, height);
+  let buffer32 = new Uint32Array(imageData.data.buffer);
+  let len = buffer32.length;
 
-  // Text
-  gsap.fromTo(".text", {
-      y: 20,
-    }, {
-      scrollTrigger: {
-        trigger: "#text-scrolltrigger",
-        start: "top bottom",
-        end: "+=0",
-        //markers: true,
-        toggleActions: "restart none reverse none"
-      },
-      y: 0,
-      opacity: "100%",
-      ease: "power1.inOut",
-      duration: 1
+  function noise() {
+    for (let i = 0; i < len; i++) {
+      buffer32[i] = Math.random() * 255 << 24;
     }
-  )
-
-
-  /*
-  let bannerTl = gsap.timeline({repeat: -1})
-  bannerTl.timeScale(10);
-
-  let noiseMin = 5;
-  let noiseMax = 5.0001;
-
-  function getRandomNumber(min, max) {
-    return Math.random() * (max - min) + min;
+    ctx.putImageData(imageData, 0, 0);
   }
 
-  bannerTl.to("#fractal-noise", {
-    attr: { baseFrequency: getRandomNumber(noiseMin, noiseMax) },
-  });
-  */
+  const fps = 20;
+  const interval = 1000 / fps;
 
-  /*
-  let bannerTl = gsap.timeline({repeat: -1});
-  //bannerTl.timeScale(1);
-
-  let noiseMin = 5;
-  let noiseMax = 5.00012;
-
-  function getRandomNumber(min, max) {
-    return Math.random() * (max - min) + min;
+  function loop() {
+    noise();
+    setTimeout(() => {
+      requestAnimationFrame(loop);
+    }, interval);
   }
 
-  // Function to update the base frequency continuously
-  function updateBaseFrequency() {
-    let newFrequency = getRandomNumber(noiseMin, noiseMax);
-    gsap.set("#fractal-noise", {
-      attr: { baseFrequency: newFrequency },
-    });
-  }
-
-  // Call updateBaseFrequency continuously using GSAP ticker
-  gsap.ticker.add(updateBaseFrequency);
-
-  // Start the timeline animation
-  bannerTl.to("#fractal-noise", {
-    repeat: -1,  // infinite repeat
-    onRepeat: updateBaseFrequency // call updateBaseFrequency on each repeat
-  });
-  */
+  loop();
 });
